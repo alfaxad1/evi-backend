@@ -39,6 +39,6 @@ public class ExpenseController {
     @PostMapping()
     public ResponseEntity<?> createExpense(@RequestBody CreateExpenseRequest request) {
         expenseService.createExpense(request);
-        return ResponseEntity.ok().body("Expense created successfully");
+        return ResponseEntity.ok().body("Expense recorded successfully");
     }
 }
