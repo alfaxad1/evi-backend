@@ -29,7 +29,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "target/loanApp-0.0.1-SNAPSHOT.jar"
-          target: "/home/admin/loanapp.co.ke/loanApp-0.0.1-SNAPSHOT.jar"
+          target: "/home/admin/loanapp.co.ke"
 
       - name: Fix Permissions and Restart Service
         uses: appleboy/ssh-action@v1.0.3
@@ -38,6 +38,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            mv /home/admin/loanapp.co.ke/target/loanApp-0.0.1-SNAPSHOT.jar /home/admin/loanapp.co.ke/loanApp-0.0.1-SNAPSHOT.jar
             sudo chown -R www-data:www-data /home/admin/loanapp.co.ke
             sudo systemctl restart loanapp.service
             echo "Deployment complete."
