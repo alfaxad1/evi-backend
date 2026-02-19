@@ -45,7 +45,7 @@ public class JwtUtils {
                 .compact();
     }
     public String createRefreshToken(User user) {
-        long expiration = 1000 * 60 * 60 * 24  * 7;
+        long expiration = 1000 * 60 * 60;
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .claim("type", "refresh")
