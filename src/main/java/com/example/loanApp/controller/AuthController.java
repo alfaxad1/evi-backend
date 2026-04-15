@@ -39,19 +39,6 @@ public class AuthController {
                 .sameSite("Lax")
                 .maxAge(7 * 24 * 60 * 60)
                 .build();
-
-//        ApiResponse<LoginResponse> apiResponse = ApiResponse.<LoginResponse>builder()
-//                .success(true)
-//                .message("Login successful")
-//                .data(LoginResponse.builder()
-//                        .accessToken(response.getAccessToken())
-//                        .expirationTime(response.getExpirationTime())
-//                        .role(response.getRole())
-//                        .userId(response.getUserId())
-//                        .tokenType("Bearer")
-//                        .build())
-//                .build();
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .body(response);
