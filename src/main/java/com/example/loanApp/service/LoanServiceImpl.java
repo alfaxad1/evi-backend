@@ -420,7 +420,7 @@ public class LoanServiceImpl implements LoanService {
                     .amountDisbursedToday(loanRepository.dayDisbursedAmount(userId, LoanStatus.active, role, branchId, LocalDate.now()))
                     .amountCollectedToday(repaymentRepository.dailyTotalRepayments(userId, LocalDate.now(), role, RepaymentStatus.paid))
                     .totalMonthlyDisbursement(loanRepository.totalMonthlyDisbursement(userId, role, branchId, LocalDate.now().getMonthValue(), LocalDate.now().getYear()))
-                    .totalMonthlyCollection(repaymentRepository.totalMonthlyCollection(userId, LocalDateTime.now().getMonthValue(), role,branchId, RepaymentStatus.paid))
+                    .totalMonthlyCollection(repaymentRepository.totalMonthlyCollection(userId, LocalDateTime.now().getMonthValue(), LocalDateTime.now().getYear(), role, branchId, RepaymentStatus.paid))
                     .interestEarnedToday(loanRepository.interestEarnedToday(userId, LoanStatus.active, role, branchId, LocalDate.now()))
                     .customersCount(customerRepository.countActiveCustomers(true, userId, role,branchId))
                     .returnCustomers(customerRepository.countReturnCustomers(role, userId, branchId))

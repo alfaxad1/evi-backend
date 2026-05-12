@@ -52,9 +52,10 @@ public interface RepaymentRepository extends JpaRepository<Repayment, Integer> {
             "left join r.user u " +
             "where r.status = :status " +
             "and month(r.paymentDate)= :month " +
+            "and year(r.paymentDate)= :year "  +
             "AND (:role = 'admin' OR u.id = :userId)" +
             "and (:branchId is null or r.branch.id = :branchId)")
-    float totalMonthlyCollection(int userId, Integer month, String role, Integer branchId, RepaymentStatus status);
+    float totalMonthlyCollection(int userId, Integer month, Integer year, String role, Integer branchId, RepaymentStatus status);
 
     @Query("select r.loan.id, concat(r.loan.customer.firstName, ' ', r.loan.customer.lastName), " +
             "r.paymentDate, r.status, r.transactionCode, r.paymentName, l.loanStatus, l.totalAmount, r.amount " +
@@ -129,6 +130,7 @@ public interface RepaymentRepository extends JpaRepository<Repayment, Integer> {
             "LEFT JOIN users u ON r.created_by = u.id " +
             "WHERE YEARWEEK(r.paid_date, 1) = YEARWEEK(:targetDate, 1) " +
             "AND (:role = 'admin' OR u.id = :userId) " +
+            "and r.status = :status " +
             "and (:branchId is null or r.branch_id = :branchId) " +
             "GROUP BY day, DAYOFWEEK(r.paid_date) " +
             "ORDER BY DAYOFWEEK(r.paid_date)",
@@ -137,6 +139,7 @@ public interface RepaymentRepository extends JpaRepository<Repayment, Integer> {
             @Param("targetDate") String targetDate,
             @Param("userId") Integer userId,
             @Param("role") String role,
+            String status,
             Integer branchId
     );
 }

@@ -295,7 +295,7 @@ public class RepaymentServiceImpl implements RepaymentService {
             String role = getUserRole(userId);
             Integer branchId = BranchContext.get();
             String targetDate = date != null ? date : LocalDate.now().toString();
-            List<WeeklyStatsProjection> stats = repaymentRepository.getStatsBySpecificWeek(targetDate, userId, role, branchId);
+            List<WeeklyStatsProjection> stats = repaymentRepository.getStatsBySpecificWeek(targetDate, userId, role, RepaymentStatus.paid.name(), branchId);
             Double total = stats.stream().mapToDouble(WeeklyStatsProjection::getAmount).sum();
 
             return new WeeklyRepaymentResponse(total, stats);
