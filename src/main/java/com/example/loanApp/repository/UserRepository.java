@@ -15,12 +15,21 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
     User findUserById(Integer id);
 
-    @Query("select u from User u " +
-            "where u.isActive = :isActive " +
-            "and (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-            "OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-            "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')) ) ")
-    Page<User> findActiveUsers(@Param("search") String search, Pageable pageable, boolean isActive);
+    @Query("""
+    SELECT u FROM User u
+    WHERE u.isActive = :isActive
+    AND (
+        :search IS NULL
+        OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
+        OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%'))
+        OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))
+    )
+""")
+    Page<User> findActiveUsers(
+            @Param("search") String search,
+            Pageable pageable,
+            @Param("isActive") boolean isActive
+    );
 
     @Query("select role from User where id = :userId")
     String findRoleById(int userId);

@@ -1,9 +1,6 @@
 package com.example.loanApp.service;
 
-import com.example.loanApp.dtos.CreateCustomerRequest;
-import com.example.loanApp.dtos.CustomerDetailsDto;
-import com.example.loanApp.dtos.CustomersData;
-import com.example.loanApp.dtos.GenericResponse;
+import com.example.loanApp.dtos.*;
 import com.example.loanApp.entities.Customer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,4 +26,6 @@ public interface CustomerServices {
     void deleteCustomer(Integer id);
 
      List<CustomersData> findCustomers(Pageable pageable);
+
+    void transferCustomer(TransferCustomerRequest request);
 }

@@ -3,6 +3,7 @@ package com.example.loanApp.controller;
 import com.example.loanApp.dtos.CreateCustomerRequest;
 import com.example.loanApp.dtos.CustomerDetailsDto;
 import com.example.loanApp.dtos.GenericResponse;
+import com.example.loanApp.dtos.TransferCustomerRequest;
 import com.example.loanApp.entities.Customer;
 import com.example.loanApp.enums.ResponseStatusEnum;
 import com.example.loanApp.service.CustomerServicesImpl;
@@ -70,5 +71,11 @@ public class CustomerController {
     public ResponseEntity<?> getAllCustomers(@RequestParam(required = false, defaultValue = "0") int page, @RequestParam(required = false, defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return ResponseEntity.ok().body(customerService.findCustomers(pageable));
+    }
+
+    @PutMapping("/customer/transfer")
+    public ResponseEntity<?> transferCustomers(@RequestBody TransferCustomerRequest request){
+        customerService.transferCustomer(request);
+        return ResponseHandler.responseBuilder("customers transferred successfully", HttpStatus.OK, null);
     }
 }

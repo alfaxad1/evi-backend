@@ -251,4 +251,19 @@ public class CustomerServicesImpl implements CustomerServices {
         }
         return dataList;
     }
+
+    @Override
+    public void transferCustomer(TransferCustomerRequest request) {
+        try{
+            List<Customer> customers = customerRepository.findAllById(request.getCustomerIds());
+            User user = userRepository.findUserById(request.getOfficerId());
+            for (Customer customer : customers) {
+                customer.setUser(user);
+                customerRepository.save(customer);
+            }
+        }catch (Exception e){
+            throw new RuntimeException("Error saving customer: " +e.getMessage());
+        }
+
+    }
 }
