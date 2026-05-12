@@ -42,7 +42,6 @@ public class LoanServiceImpl implements LoanService {
     private final  RolledOverLoansRepository rolledOverLoansRepository;
     private final LoanRepayments loanRepayments;
     private final LoanHelpers loanHelpers;
-    private final DashboardSseService dashboardSseService;
     private final LoanClearedManuallyRepository clearedManuallyRepository;
     private final UserDetailsService userDetailsService;
 
@@ -81,7 +80,6 @@ public class LoanServiceImpl implements LoanService {
         loanRepository.save(loan);
 
         Integer officerId = loan.getUser().getId();
-        dashboardSseService.send(officerId);
     }
 
     @Override
@@ -97,7 +95,6 @@ public class LoanServiceImpl implements LoanService {
         loanRepository.save(loan);
 
         Integer officerId = loan.getUser().getId();
-        dashboardSseService.send(officerId);
     }
 
     @Override
@@ -422,7 +419,7 @@ public class LoanServiceImpl implements LoanService {
                     .interestPaid(loanRepository.interestPaid(userId, List.of(LoanStatus.active, LoanStatus.paid), role, branchId, LocalDate.now().getMonthValue()))
                     .amountDisbursedToday(loanRepository.dayDisbursedAmount(userId, LoanStatus.active, role, branchId, LocalDate.now()))
                     .amountCollectedToday(repaymentRepository.dailyTotalRepayments(userId, LocalDate.now(), role, RepaymentStatus.paid))
-                    .totalMonthlyDisbursement(loanRepository.totalMonthlyDisbursement(userId, LoanStatus.active, role, branchId, LocalDate.now().getMonthValue()))
+                    .totalMonthlyDisbursement(loanRepository.totalMonthlyDisbursement(userId, role, branchId, LocalDate.now().getMonthValue(), LocalDate.now().getYear()))
                     .totalMonthlyCollection(repaymentRepository.totalMonthlyCollection(userId, LocalDateTime.now().getMonthValue(), role,branchId, RepaymentStatus.paid))
                     .interestEarnedToday(loanRepository.interestEarnedToday(userId, LoanStatus.active, role, branchId, LocalDate.now()))
                     .customersCount(customerRepository.countActiveCustomers(true, userId, role,branchId))

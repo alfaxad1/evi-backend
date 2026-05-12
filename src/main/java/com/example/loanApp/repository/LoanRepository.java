@@ -228,14 +228,22 @@ public interface LoanRepository extends JpaRepository<Loan, Integer> {
             "AND l.disbursementDate = :day ")
     float dayDisbursedAmount(int userId, LoanStatus status, String role, Integer branchId, LocalDate day);
 
-    @Query("SELECT coalesce(sum(l.principal), 0) " +
-            "FROM Loan l " +
-            "LEFT JOIN l.user u " +
-            "WHERE (:role = 'admin' OR u.id = :userId) " +
-            "and (:branchId is null or l.branch.id = :branchId) " +
-            "AND l.loanStatus = :status " +
-            "AND MONTH(l.disbursementDate) = :month ")
-    float totalMonthlyDisbursement (int userId, LoanStatus status, String role, Integer branchId, Integer month);
+    @Query("""
+    SELECT COALESCE(SUM(l.principal), 0)
+    FROM Loan l
+    LEFT JOIN l.user u ON l.user.id = u.id
+    WHERE (:role = 'admin' OR u.id = :userId)
+    AND (:branchId IS NULL OR l.branch.id = :branchId)
+    AND MONTH(l.disbursementDate) = :month
+    AND YEAR(l.disbursementDate) = :year
+""")
+    float totalMonthlyDisbursement(
+            int userId,
+            String role,
+            Integer branchId,
+            Integer month,
+            Integer year
+    );
 
     @Query("select l from Loan l where l.customer.id = :customerId order by l.id desc limit 1")
     Loan findLatestByCustomerId(Integer customerId);
