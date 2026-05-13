@@ -17,18 +17,14 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # Navigate to project directory
             cd /home/admin/loanapp.co.ke/
 
-            # Pull latest changes
             git pull origin main
 
-            # Build the application on the server
             mvn clean package -DskipTests
 
-            # Restart the service
-            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S systemctl restart loanapp.service
-            
-            # Verify status
+            sudo systemctl restart loanapp.service
+
             sudo systemctl is-active loanapp.service
+            
             echo "Deployment successful."
