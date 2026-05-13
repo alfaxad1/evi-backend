@@ -83,7 +83,7 @@ public class AuthController {
 
     @GetMapping("/tester")
     public ResponseEntity<String> tester(){
-        return ResponseEntity.ok("Loan App running....");
+        return ResponseEntity.ok("This is a test endpoint....");
     }
 
 }
