@@ -2,6 +2,7 @@ package com.example.loanApp.repository;
 
 import com.example.loanApp.dtos.MonthlyTrendProjection;
 import com.example.loanApp.dtos.WeeklyStatsProjection;
+import com.example.loanApp.entities.Loan;
 import com.example.loanApp.entities.Repayment;
 import com.example.loanApp.enums.RepaymentStatus;
 import jakarta.persistence.Tuple;
@@ -142,4 +143,6 @@ public interface RepaymentRepository extends JpaRepository<Repayment, Integer> {
             String status,
             Integer branchId
     );
+
+    List<Repayment> findAllByLoanId(Integer loanId);
 }

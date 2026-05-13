@@ -271,17 +271,25 @@ public class LoanServiceImpl implements LoanService {
 
             for(Tuple loan : loans){
                 LoanStatus loanStatus = loan.get(14, LoanStatus.class);
-                //LoanStatus loanCurrentStatus = loan.get(21, LoanStatus.class);
+
+                Integer loanId = loan.get(0, Integer.class);
+
+                List<Repayment> payments = repaymentRepository.findAllByLoanId(loanId);
+
+                float totalPaid = (float) payments.stream().mapToDouble(Repayment::getAmount).sum();
+                Float totalAmount = loan.get(5, Float.class);
+
+                Float balance = totalAmount - totalPaid;
 
                 LoansDto dto = LoansDto.builder()
-                        .loanId(loan.get(0, Integer.class))
+                        .loanId(loanId)
                         .customerName(loan.get(1, String.class))
                         .principal(loan.get(2, Float.class))
                         .processingFee(loan.get(3, Float.class))
                         .interest(loan.get(4, Float.class))
-                        .totalAmount(loan.get(5, Float.class))
+                        .totalAmount(totalAmount)
                         .paidAmount(loan.get(6, Float.class))
-                        .balance(loan.get(7, Float.class))
+                        .balance(balance)
                         .monthlyIncome(loan.get(8, Float.class))
                         .installmentAmount(loan.get(9, Float.class))
                         .arrears(loan.get(10, Float.class))
