@@ -277,7 +277,7 @@ public class LoanServiceImpl implements LoanService {
                 List<Repayment> payments = repaymentRepository.findAllByLoanId(loanId);
 
                 float totalPaid = (float) payments.stream().mapToDouble(Repayment::getAmount).sum();
-                Float totalAmount = loan.get(5, Float.class);
+                Float totalAmount = (loan.get(5, Float.class) != null) ? loan.get(5, Float.class) :  0.0f;
 
                 Float balance = totalAmount - totalPaid;
 
