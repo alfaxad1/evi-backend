@@ -37,6 +37,7 @@ public class CustomerServicesImpl implements CustomerServices {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final UserRepository officerRepository;
+    private final FileUploadService uploadService;
 
     @Override
     public Customer getCustomer(Integer id) {
@@ -181,12 +182,12 @@ public class CustomerServicesImpl implements CustomerServices {
 
             // Save photos and set file paths
             if (nationalIdPhoto != null && !nationalIdPhoto.isEmpty()) {
-                String path = fileStorageService.saveFile(nationalIdPhoto);
+                String path = uploadService.uploadToHetzner(idNumber, nationalIdPhoto);
                 customer.setNationalIdPhoto(path);
             }
 
             if (passportPhoto != null && !passportPhoto.isEmpty()) {
-                String path = fileStorageService.saveFile(passportPhoto);
+                String path = uploadService.uploadToHetzner(idNumber, passportPhoto);
                 customer.setPassportPhoto(path);
             }
             customerRepository.save(customer);
@@ -208,12 +209,12 @@ public class CustomerServicesImpl implements CustomerServices {
                 guarantor.setCustomer(customer);
 
                 if (guarantorIdPhoto != null && !guarantorIdPhoto.isEmpty()) {
-                    String idPath = fileStorageService.saveFile(guarantorIdPhoto);
+                    String idPath = uploadService.uploadToHetzner(idNumber, guarantorIdPhoto);
                     guarantor.setIdPhoto(idPath);
                 }
 
                 if (guarantorPassPhoto != null && !guarantorPassPhoto.isEmpty()) {
-                    String passPath = fileStorageService.saveFile(guarantorPassPhoto);
+                    String passPath = uploadService.uploadToHetzner(idNumber, guarantorPassPhoto);
                     guarantor.setPassPhoto(passPath);
                 }
             }
