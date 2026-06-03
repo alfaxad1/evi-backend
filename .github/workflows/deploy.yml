@@ -46,19 +46,20 @@ jobs:
               
               cd /home/admin/loanapp.co.ke/
               
-              echo "Moving JAR file and cleaning up target directory..."
+              echo "Processing deployment artifacts..."
+              # 1. Works without sudo because admin owns the folder
+              mv target/*.jar loanapp.jar
               
-              sudo mv target/*.jar loanapp.jar
+              # 2. Works without sudo
+              rm -rf target/
               
-              sudo rm -rf target/
-              
-              sudo chown www-data:www-data loanapp.jar
+              # 3. Ensures www-data group can still read the new file
+              chmod 640 loanapp.jar
               
               echo "Restarting service..."
+              # (systemctl always requires sudo, but it handles its own system privilege)
               sudo systemctl restart loanapp.service
               
-              echo "Waiting for Liquibase migrations to initialize..."
               sleep 5
-              
               sudo systemctl is-active loanapp.service
               echo "Deployment successful!"
