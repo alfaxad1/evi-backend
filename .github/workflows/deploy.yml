@@ -24,55 +24,59 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      # 2. Copy only the generated JAR file to your VPS
+      # 2. Copy the generated JAR file directly to your VPS root folder
       - name: Copy JAR to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "target/*.jar"
+          source: "target/loanApp-*.jar"
           target: "/home/admin/loanapp.co.ke/"
           strip_components: 1
 
+      # 3. Process the file and cycle the systemd service
       - name: Restart Application Service
         uses: appleboy/ssh-action@v1.0.3
         with:
-            host: ${{ secrets.VPS_HOST }}
-            username: ${{ secrets.VPS_USER }}
-            key: ${{ secrets.VPS_SSH_KEY }}
-            script: |
-              set -e
-              
-              cd /home/admin/loanapp.co.ke/
-              
-              echo "Processing deployment artifacts..."
-              
-              # Smart check: If target folder exists and has a jar, move it. 
-              # Otherwise, check if the jar is already in the root folder.
-              if [ -d "target" ] && ls target/*.jar >/dev/null 2>&1; then
-                  echo "Found JAR inside target/ folder. Moving to root..."
-                  mv target/*.jar loanapp.jar
-              elif ls *.jar >/dev/null 2>&1 && [ ! -f "loanapp.jar" ]; then
-                  echo "Found JAR in root folder. Renaming to loanapp.jar..."
-                  mv loanApp-*.jar loanapp.jar || mv *SNAPSHOT.jar loanapp.jar
-              else
-                  echo "Checking directory contents to see what went wrong:"
-                  ls -la
-                  ls -la target/ || true
-                  echo "ERROR: No compiled JAR file found!"
-                  exit 1
-              fi
-              
-              # Clean up the target directory if it exists
-              rm -rf target/
-              
-              # Ensure the service user group can read it
-              chmod 640 loanapp.jar
-              
-              echo "Restarting service..."
-              sudo systemctl restart loanapp.service
-              
-              sleep 5
-              sudo systemctl is-active loanapp.service
-              echo "Deployment successful!"
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            
+            cd /home/admin/loanapp.co.ke/
+            
+            echo "Processing deployment artifacts..."
+            
+            # Find any newly uploaded snapshot JAR file
+            NEW_JAR=$(ls loanApp-*.jar 2>/dev/null | head -n 1)
+            
+            if [ -n "$NEW_JAR" ]; then
+                echo "Found newly uploaded artifact: $NEW_JAR"
+                echo "Replacing production loanapp.jar..."
+                # Force overwrite the running jar with the new one
+                mv -f "$NEW_JAR" loanapp.jar
+            elif [ -f "loanapp.jar" ]; then
+                echo "No new version uploaded, but an existing loanapp.jar is present. Proceeding with restart..."
+            else
+                echo "Checking directory contents to diagnose missing file:"
+                ls -la
+                echo "ERROR: No deployable JAR file found!"
+                exit 1
+            fi
+            
+            # Double check cleaning up accidental target directories if scp misbehaved
+            rm -rf target/
+            
+            # Ensure the service user group (www-data) can read the execution file
+            chmod 640 loanapp.jar
+            
+            echo "Restarting loanapp.service..."
+            sudo systemctl restart loanapp.service
+            
+            echo "Waiting for Liquibase migrations to initialize..."
+            sleep 5
+            
+            sudo systemctl is-active loanapp.service
+            echo "Deployment successful!"
