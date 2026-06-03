@@ -47,17 +47,30 @@ jobs:
               cd /home/admin/loanapp.co.ke/
               
               echo "Processing deployment artifacts..."
-              # 1. Works without sudo because admin owns the folder
-              mv target/*.jar loanapp.jar
               
-              # 2. Works without sudo
+              # Smart check: If target folder exists and has a jar, move it. 
+              # Otherwise, check if the jar is already in the root folder.
+              if [ -d "target" ] && ls target/*.jar >/dev/null 2>&1; then
+                  echo "Found JAR inside target/ folder. Moving to root..."
+                  mv target/*.jar loanapp.jar
+              elif ls *.jar >/dev/null 2>&1 && [ ! -f "loanapp.jar" ]; then
+                  echo "Found JAR in root folder. Renaming to loanapp.jar..."
+                  mv loanApp-*.jar loanapp.jar || mv *SNAPSHOT.jar loanapp.jar
+              else
+                  echo "Checking directory contents to see what went wrong:"
+                  ls -la
+                  ls -la target/ || true
+                  echo "ERROR: No compiled JAR file found!"
+                  exit 1
+              fi
+              
+              # Clean up the target directory if it exists
               rm -rf target/
               
-              # 3. Ensures www-data group can still read the new file
+              # Ensure the service user group can read it
               chmod 640 loanapp.jar
               
               echo "Restarting service..."
-              # (systemctl always requires sudo, but it handles its own system privilege)
               sudo systemctl restart loanapp.service
               
               sleep 5
