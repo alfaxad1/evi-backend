@@ -46,17 +46,19 @@ jobs:
               
               cd /home/admin/loanapp.co.ke/
               
-              # 1. Take whatever jar was compiled, overwrite the static production loanapp.jar
-              mv target/*.jar loanapp.jar
+              echo "Moving JAR file and cleaning up target directory..."
               
-              # 2. Keep the directory clean by removing the build artifacts folder
-              rm -rf target/
+              sudo mv target/*.jar loanapp.jar
               
-              # 3. Ensure the service user still owns the new file
+              sudo rm -rf target/
+              
               sudo chown www-data:www-data loanapp.jar
               
               echo "Restarting service..."
               sudo systemctl restart loanapp.service
               
+              echo "Waiting for Liquibase migrations to initialize..."
               sleep 5
+              
               sudo systemctl is-active loanapp.service
+              echo "Deployment successful!"
