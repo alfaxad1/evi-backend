@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Customer collaterals -->
+    <changeSet id="V008a-create-customer-collaterals" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="customer_collaterals"/></not>
+        </preConditions>
+
+        <createTable tableName="customer_collaterals">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customer_id" type="INT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_cust_collat_customer"
+                             references="customers(id)"/>
+            </column>
+            <column name="item_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="item_count" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="additional_details" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Guarantor collaterals -->
+    <changeSet id="V008b-create-guarantor-collaterals" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="guarantor_collaterals"/></not>
+        </preConditions>
+
+        <createTable tableName="guarantor_collaterals">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="guarantor_id" type="INT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_guar_collat_guarantor"
+                             references="guarantors(id)"/>
+            </column>
+            <column name="item_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="item_count" type="INT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="additional_details" type="LONGTEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="V012-create-rolled-over-loans" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="ROLLED_OVER_LOANS"/></not>
+        </preConditions>
+
+        <createTable tableName="ROLLED_OVER_LOANS">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="branch_id" type="INT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_rolled_branch"
+                             references="branch(id)"/>
+            </column>
+            <column name="prev_loan_id" type="bigint">
+                <constraints nullable="true"
+                             foreignKeyName="fk_rolled_prev_loan"
+                             references="loans(id)"/>
+            </column>
+            <column name="new_loan_id" type="bigint">
+                <constraints nullable="true"
+                             foreignKeyName="fk_rolled_new_loan"
+                             references="loans(id)"/>
+            </column>
+            <column name="ROLLOVER_DATE" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="V005-create-loans" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="loans"/></not>
+        </preConditions>
+
+        <createTable tableName="loans">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="branch_id" type="INT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_loans_branch"
+                             references="branch(id)"/>
+            </column>
+            <column name="customer_id" type="INT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_loans_customer"
+                             references="customers(id)"/>
+            </column>
+            <column name="product_id" type="INT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_loans_product"
+                             references="loan_products(id)"/>
+            </column>
+            <column name="officer_id" type="INT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_loans_officer"
+                             references="users(id)"/>
+            </column>
+            <column name="application_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="applied_amount" type="FLOAT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="approval_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="approval_status" type="VARCHAR(50)" remarks="Enum: PENDING, APPROVED, REJECTED">
+                <constraints nullable="true"/>
+            </column>
+            <column name="arrears" type="FLOAT" defaultValueNumeric="0.00">
+                <constraints nullable="true"/>
+            </column>
+            <column name="default_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="disbursement_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="installment_amount" type="FLOAT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="installment_type" type="VARCHAR(50)" remarks="Enum: DAILY, WEEKLY, MONTHLY">
+                <constraints nullable="true"/>
+            </column>
+            <column name="total_interest" type="FLOAT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="principal" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="processing_fee" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="purpose" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rejection_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rejection_reason" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="remaining_balance" type="FLOAT" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_amount" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="installments_sum" type="FLOAT" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="completed_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="expected_completion_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="due_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="loan_current_status" type="VARCHAR(50)" remarks="Enum: ACTIVE, PAID, DEFAULTED, ROLLED_OVER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="VARCHAR(50)" remarks="Enum: ACTIVE, PAID, DEFAULTED, ROLLED_OVER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rolled_over" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

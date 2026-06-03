@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="V013-create-expenses" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="expenses"/></not>
+        </preConditions>
+
+        <createTable tableName="expenses">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="branch_id" type="INT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_expenses_branch"
+                             references="branch(id)"/>
+            </column>
+            <column name="expense_type" type="VARCHAR(50)" remarks="Enum: SALARY, RENT, UTILITIES, OTHER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="item" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="unit_cost" type="FLOAT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="no_of_items" type="DECIMAL(19,2)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="total_cost" type="FLOAT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

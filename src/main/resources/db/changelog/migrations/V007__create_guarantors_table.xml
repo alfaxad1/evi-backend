@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="V007-create-guarantors" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="guarantors"/></not>
+        </preConditions>
+
+        <createTable tableName="guarantors">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customer_id" type="INT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_guarantors_customer"
+                             references="customers(id)"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_number" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_photo" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="pass_photo" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="relationship" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="business_location" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="residence_details" type="LONGTEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

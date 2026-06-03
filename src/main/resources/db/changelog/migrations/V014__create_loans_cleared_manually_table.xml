@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="V014-create-loans-cleared-manually" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="loans_cleared_manually"/></not>
+        </preConditions>
+
+        <createTable tableName="loans_cleared_manually">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="reference_id" type="INT"
+                    remarks="References the loan id that was manually cleared">
+                <constraints nullable="true"/>
+            </column>
+            <column name="initial_balance" type="FLOAT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="initial_arrear" type="FLOAT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

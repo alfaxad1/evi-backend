@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Master changelog – include individual migration files in order.
+        Each file represents a logical migration step.
+        New changesets should be added in a new numbered file and
+        included here at the bottom.
+    -->
+
+    <include file="db/changelog/migrations/V001__create_branch_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V002__create_loan_products_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V003__create_users_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V004__create_customers_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V005__create_loans_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V006__create_repayments_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V007__create_guarantors_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V008__create_collaterals_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V009__create_referees_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V010__create_notes_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V011__create_mpesa_transactions_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V012__create_rolled_over_loans_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V013__create_expenses_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V014__create_loans_cleared_manually_table.xml"
+             relativeToChangelogFile="false"/>
+
+</databaseChangeLog>

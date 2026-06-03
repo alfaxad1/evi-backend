@@ -123,6 +123,12 @@
             <artifactId>s3</artifactId>
             <version>2.25.15</version>
         </dependency>
+
+        <!-- Liquibase – database schema migration -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

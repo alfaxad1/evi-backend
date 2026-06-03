@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="V002-create-loan-products" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="loan_products"/></not>
+        </preConditions>
+
+        <createTable tableName="loan_products">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="min_amount" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_amount" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="interest_rate" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="duration_days" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

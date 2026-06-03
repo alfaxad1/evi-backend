@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="V011-create-mpesa-transactions" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="mpesa_transactions"/></not>
+        </preConditions>
+
+        <createTable tableName="mpesa_transactions">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="branch_id" type="INT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_txn_branch"
+                             references="branch(id)"/>
+            </column>
+            <column name="customer_id" type="INT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_txn_customer"
+                             references="customers(id)"/>
+            </column>
+            <column name="loan_id" type="INT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_txn_loan"
+                             references="loans(id)"/>
+            </column>
+            <column name="repayment_id" type="INT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_txn_repayment"
+                             references="repayments(id)"/>
+            </column>
+            <column name="initiated_by" type="INT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_txn_user"
+                             references="users(id)"/>
+            </column>
+            <column name="amount" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(50)" remarks="Enum: DISBURSEMENT, REPAYMENT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mpesa_code" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)" defaultValue="PENDING"
+                    remarks="Enum: PENDING, SUCCESS, FAILED">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

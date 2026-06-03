@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="V004-create-customers" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="customers"/></not>
+        </preConditions>
+
+        <createTable tableName="customers">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="branch_id" type="INT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_customers_branch"
+                             references="branch(id)"/>
+            </column>
+            <column name="created_by" type="INT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_customers_user"
+                             references="users(id)"/>
+            </column>
+            <column name="first_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="middle_name" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="last_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="national_id" type="VARCHAR(30)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="national_id_photo" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="passport_photo" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="date_of_birth" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="gender" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="residence_details" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="county" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="occupation" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="business_name" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="business_location" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="monthly_income" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credit_score" type="INT" defaultValueNumeric="0">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="true"/>
+            </column>
+            <column name="deleted_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
