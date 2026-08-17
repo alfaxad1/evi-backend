@@ -54,4 +54,10 @@
     <include file="db/changelog/migrations/V014__create_loans_cleared_manually_table.xml"
              relativeToChangelogFile="false"/>
 
+    <include file="db/changelog/migrations/V015__extend_expenses_table.xml"
+             relativeToChangelogFile="false"/>
+
+    <include file="db/changelog/migrations/V016__create_leads_tables.xml"
+             relativeToChangelogFile="false"/>
+
 </databaseChangeLog>

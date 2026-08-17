@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Extends the expenses table with the fields required by the
+         Company Expenses module: date, category, transaction cost,
+         recipient, status, receipt and audit columns. -->
+
+    <changeSet id="V015-1-expenses-new-columns" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="expenses" columnName="expense_date"/></not>
+        </preConditions>
+
+        <addColumn tableName="expenses">
+            <column name="expense_date" type="DATE"/>
+            <column name="category" type="VARCHAR(50)"
+                    remarks="TRANSPORT, OFFICE_SUPPLIES, UTILITIES, SOFTWARE, RENT, SALARIES, MARKETING, BANK_CHARGES, OTHER"/>
+            <column name="transaction_cost" type="DECIMAL(19,2)" defaultValueNumeric="0"/>
+            <column name="recipient_name" type="VARCHAR(255)"/>
+            <column name="recipient_user_id" type="INT"/>
+            <column name="status" type="VARCHAR(30)" defaultValue="PENDING"/>
+            <column name="receipt_url" type="VARCHAR(512)"/>
+            <column name="created_by" type="INT"/>
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="V015-2-expenses-backfill" author="system">
+        <update tableName="expenses">
+            <column name="expense_date" valueComputed="CURRENT_DATE"/>
+            <where>expense_date IS NULL</where>
+        </update>
+        <update tableName="expenses">
+            <column name="status" value="PAID"/>
+            <where>status IS NULL</where>
+        </update>
+        <update tableName="expenses">
+            <column name="category" value="OTHER"/>
+            <where>category IS NULL</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="V015-3-expenses-money-precision" author="system">
+        <modifyDataType tableName="expenses" columnName="unit_cost" newDataType="DECIMAL(19,2)"/>
+        <modifyDataType tableName="expenses" columnName="total_cost" newDataType="DECIMAL(19,2)"/>
+    </changeSet>
+
+    <changeSet id="V015-4-expenses-indexes" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists indexName="idx_expenses_branch_date"/></not>
+        </preConditions>
+        <createIndex tableName="expenses" indexName="idx_expenses_branch_date">
+            <column name="branch_id"/>
+            <column name="expense_date"/>
+        </createIndex>
+        <createIndex tableName="expenses" indexName="idx_expenses_status">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

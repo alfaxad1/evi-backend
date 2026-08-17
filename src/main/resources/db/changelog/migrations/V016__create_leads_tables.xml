@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Lead Management module: leads captured in the field plus the
+         timeline of interactions logged against each lead. -->
+
+    <changeSet id="V016-1-create-leads" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="leads"/></not>
+        </preConditions>
+
+        <createTable tableName="leads">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="branch_id" type="INT"/>
+            <column name="name" type="VARCHAR(150)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(30)" defaultValue="OPEN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source" type="VARCHAR(60)"/>
+            <column name="location" type="VARCHAR(255)"/>
+            <column name="assigned_officer_id" type="INT"/>
+            <column name="next_action_date" type="DATE"/>
+            <column name="last_interaction_date" type="DATE"/>
+            <column name="converted_customer_id" type="INT"/>
+            <column name="converted_at" type="TIMESTAMP"/>
+            <column name="created_by" type="INT"/>
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="leads" baseColumnNames="branch_id"
+                                 constraintName="fk_leads_branch"
+                                 referencedTableName="branch" referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+
+        <addForeignKeyConstraint baseTableName="leads" baseColumnNames="assigned_officer_id"
+                                 constraintName="fk_leads_officer"
+                                 referencedTableName="users" referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+
+        <createIndex tableName="leads" indexName="idx_leads_status_next_action">
+            <column name="status"/>
+            <column name="next_action_date"/>
+        </createIndex>
+        <createIndex tableName="leads" indexName="idx_leads_officer">
+            <column name="assigned_officer_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="V016-2-create-lead-activities" author="system">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="lead_activities"/></not>
+        </preConditions>
+
+        <createTable tableName="lead_activities">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="lead_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="interaction_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="interaction_type" type="VARCHAR(30)" defaultValue="FIELD_VISIT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notes" type="TEXT"/>
+            <column name="next_action_date" type="DATE"/>
+            <column name="created_by" type="INT"/>
+            <column name="created_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="lead_activities" baseColumnNames="lead_id"
+                                 constraintName="fk_lead_activities_lead"
+                                 referencedTableName="leads" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="lead_activities" baseColumnNames="created_by"
+                                 constraintName="fk_lead_activities_user"
+                                 referencedTableName="users" referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+
+        <createIndex tableName="lead_activities" indexName="idx_lead_activities_lead">
+            <column name="lead_id"/>
+            <column name="interaction_date"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
