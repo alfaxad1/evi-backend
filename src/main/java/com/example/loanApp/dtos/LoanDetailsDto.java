@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class LoanDetailsDto {
     private Integer loanId;
+    private Integer customerId;
     private String customerName;
     private Float principal;
     private Float processingFee;

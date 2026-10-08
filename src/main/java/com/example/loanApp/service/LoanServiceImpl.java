@@ -423,6 +423,7 @@ public class LoanServiceImpl implements LoanService {
                     .pendingDisbursement(loanRepository.loansWithStatusCount(userId, List.of(LoanStatus.pending_disbursement), branchId, role))
                     .rejected(loanRepository.loansWithApprovalStatusCount(userId, role, branchId, approved))
                     .defaulted(loanRepository.loansWithStatusCount(userId, List.of(LoanStatus.defaulted), branchId, role))
+                    .defaultedBalance(loanRepository.loansWithStatusBalance(userId, List.of(LoanStatus.defaulted), branchId, role))
                     .totalInterest(loanRepository.totalInterest(userId, LoanStatus.active, role, branchId, LocalDate.now().getMonthValue()))
                     .interestPaid(loanRepository.interestPaid(userId, List.of(LoanStatus.active, LoanStatus.paid), role, branchId, LocalDate.now().getMonthValue()))
                     .amountDisbursedToday(loanRepository.dayDisbursedAmount(userId, LoanStatus.active, role, branchId, LocalDate.now()))
@@ -638,6 +639,7 @@ public class LoanServiceImpl implements LoanService {
 
             LoanDetailsDto details = LoanDetailsDto.builder()
                     .loanId(loan.get(0, Integer.class))
+                    .customerId(loan.get(26, Integer.class))
                     .customerName(loan.get(1, String.class))
                     .principal(loan.get(2, Float.class))
                     .processingFee(loan.get(3, Float.class))

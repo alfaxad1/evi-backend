@@ -182,6 +182,13 @@ public interface LoanRepository extends JpaRepository<Loan, Integer> {
             "and (:branchId is null or l.branch.id = :branchId)")
     Long loansWithStatusCount(int userId, List<LoanStatus> status, Integer branchId, String role);
 
+    @Query("select coalesce(sum(l.remainingBalance), 0) " +
+            "from Loan l join l.user u " +
+            "where l.loanStatus in (:status) " +
+            "AND (:role = 'admin' OR u.id = :userId)" +
+            "and (:branchId is null or l.branch.id = :branchId)")
+    float loansWithStatusBalance(int userId, List<LoanStatus> status, Integer branchId, String role);
+
     @Query("select count(*) " +
             "from Loan l " +
             "LEFT JOIN l.user u " +
@@ -262,7 +269,7 @@ public interface LoanRepository extends JpaRepository<Loan, Integer> {
          "l.interest, l.totalAmount, l.paidAmount, l.remainingBalance, c.monthlyIncome, " +
          "l.installmentAmount, l.arrears, l.installmentType, c.phone, l.purpose, l.loanStatus, l.loanCurrentStatus, p.name, " +
          "u.firstName, l.dueDate , FUNCTION('DATEDIFF', l.dueDate, current date)," +
-         "l.defaultDate, l.applicationDate, l.appliedAmount, l.approvalDate, l.disbursementDate, l.updatedAt " +
+         "l.defaultDate, l.applicationDate, l.appliedAmount, l.approvalDate, l.disbursementDate, l.updatedAt, c.id " +
          "FROM Loan l " +
          "JOIN l.customer c " +
          "JOIN l.product p " +

@@ -18,7 +18,7 @@ public interface CustomerServices {
             Pageable pageable
     );
 
-    void createCustomer(CreateCustomerRequest customerRequest,
+    Integer createCustomer(CreateCustomerRequest customerRequest,
                         MultipartFile nationalIdPhoto,
                         MultipartFile passportPhoto,
                         MultipartFile guarantorIdPhoto,

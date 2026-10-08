@@ -19,6 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
+import com.example.loanApp.enums.Role;
+import com.example.loanApp.exceptions.ResourceNotFoundException;
 
 @Slf4j
 @Service
@@ -41,7 +47,57 @@ public class CustomerServicesImpl implements CustomerServices {
 
     @Override
     public Customer getCustomer(Integer id) {
-        return customerRepository.findById(id).get();
+        return accessibleCustomer(id);
+    }
+
+    private User currentUser() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) throw new AccessDeniedException("Sign in required");
+        return userRepository.findByEmail(auth.getName()).orElseThrow(() -> new AccessDeniedException("User not found"));
+    }
+
+    private Customer accessibleCustomer(Integer id) {
+        User user = currentUser();
+        Customer customer = customerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+        if (user.getRole() != Role.admin && (customer.getUser() == null || !Objects.equals(customer.getUser().getId(), user.getId()))) {
+            throw new AccessDeniedException("Customer belongs to another officer");
+        }
+        Integer branchId = BranchContext.get();
+        if (branchId != null && (customer.getBranch() == null || !Objects.equals(customer.getBranch().getId(), branchId))) {
+            throw new AccessDeniedException("Customer belongs to another branch");
+        }
+        return customer;
+    }
+
+    @Transactional(readOnly = true)
+    public CustomerDetailsDto getCustomerDetails(Integer id) {
+        return convertToDto(accessibleCustomer(id));
+    }
+
+    @Transactional
+    public void addGuarantor(Integer customerId, CreateGuarantorRequest request) {
+        Customer customer = accessibleCustomer(customerId);
+        Guarantor guarantor = new Guarantor();
+        guarantor.setCustomer(customer);
+        guarantor.setName(request.getName());
+        guarantor.setNationalId(request.getNationalId());
+        guarantor.setPhoneNumber(request.getPhoneNumber());
+        guarantor.setRelationship(request.getRelationship());
+        guarantor.setBusinessLocation(request.getBusinessLocation());
+        guarantor.setResidenceDetails(request.getResidenceDetails());
+        guarantorRepository.save(guarantor);
+    }
+
+    @Transactional
+    public void addReferee(Integer customerId, CreateRefereeRequest request) {
+        Customer customer = accessibleCustomer(customerId);
+        Referee referee = new Referee();
+        referee.setCustomer(customer);
+        referee.setName(request.getName());
+        referee.setIdNumber(request.getIdNumber());
+        referee.setPhoneNumber(request.getPhoneNumber());
+        referee.setRelationship(request.getRelationship());
+        refereeRepository.save(referee);
     }
 
     public GenericResponse<List<CustomerDetailsDto>> getAllCustomers(
@@ -54,7 +110,9 @@ public class CustomerServicesImpl implements CustomerServices {
             search = "";
         }
 
-        String role = officerRepository.findRoleById(userId);
+        User caller = currentUser();
+        if (caller.getRole() != Role.admin) userId = caller.getId();
+        String role = caller.getRole().name();
         Integer branchId = BranchContext.get();
 
         Page<Customer> page = customerRepository.searchCustomers(userId, search, role, branchId, pageable);
@@ -124,8 +182,8 @@ public class CustomerServicesImpl implements CustomerServices {
                                 g.getRelationship(),
                                 g.getBusinessLocation(),
                                 g.getResidenceDetails(),
-                                g.getPassPhoto(),
-                                g.getIdPhoto()))
+                                g.getIdPhoto(),
+                                g.getPassPhoto()))
                         .toList()
         );
 
@@ -159,7 +217,8 @@ public class CustomerServicesImpl implements CustomerServices {
     }
 
     @Override
-    public void createCustomer(CreateCustomerRequest customerRequest,
+    @Transactional
+    public Integer createCustomer(CreateCustomerRequest customerRequest,
                                MultipartFile nationalIdPhoto,
                                MultipartFile passportPhoto,
                                MultipartFile guarantorIdPhoto,
@@ -174,7 +233,8 @@ public class CustomerServicesImpl implements CustomerServices {
                 );
             }
 
-            User user = userRepository.findUserById(customerRequest.getCustomerDetails().getUserId());
+            User caller = currentUser();
+            User user = caller.getRole() == Role.admin ? userRepository.findUserById(customerRequest.getCustomerDetails().getUserId()) : caller;
 
             Customer customer = customerMapper.toEntity(customerRequest.getCustomerDetails());
             customer.setUser(user);
@@ -225,6 +285,7 @@ public class CustomerServicesImpl implements CustomerServices {
                 guarantors.forEach(guarantorCollateral::setGuarantor);
             }
             gurantorCollateralRepository.saveAll(guarantorCollaterals);
+            return customer.getId();
 
         } catch (Exception e) {
             throw new RuntimeException("Error saving customer: " +e.getMessage());

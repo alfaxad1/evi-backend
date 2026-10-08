@@ -13,6 +13,9 @@ import com.example.loanApp.repository.BranchRepository;
 import com.example.loanApp.repository.LeadActivityRepository;
 import com.example.loanApp.repository.LeadRepository;
 import com.example.loanApp.repository.UserRepository;
+import com.example.loanApp.enums.Role;
+import org.springframework.security.access.AccessDeniedException;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,17 +40,33 @@ public class LeadServiceImpl implements LeadService {
     private final LeadActivityRepository activityRepository;
     private final UserRepository userRepository;
     private final BranchRepository branchRepository;
+    private final CustomerServicesImpl customerServices;
 
     /* ─────────────── helpers ─────────────── */
 
     private User currentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || auth.getName() == null) return null;
-        return userRepository.findByEmail(auth.getName()).orElse(null);
+        if (auth == null || !auth.isAuthenticated()) throw new AccessDeniedException("Sign in required");
+        return userRepository.findByEmail(auth.getName()).orElseThrow(() -> new AccessDeniedException("User not found"));
+    }
+
+    private Lead accessibleLead(Integer id) {
+        User user = currentUser();
+        Lead lead = leadRepository.findById(id).orElseThrow(() -> new RuntimeException("Lead not found"));
+        if (user.getRole() != Role.admin && (lead.getAssignedOfficer() == null || !Objects.equals(lead.getAssignedOfficer().getId(), user.getId()))) {
+            throw new AccessDeniedException("Lead belongs to another officer");
+        }
+        Integer branchId = BranchContext.get();
+        if (branchId != null && (lead.getBranch() == null || !Objects.equals(lead.getBranch().getId(), branchId))) throw new AccessDeniedException("Lead belongs to another branch");
+        return lead;
+    }
+
+    private void requireOpenLead(Lead lead) {
+        if (lead.getStatus() == LeadStatus.CONVERTED) throw new IllegalArgumentException("This lead is already closed");
     }
 
     private Integer resolveBranchId(Integer requested) {
-        if (requested != null) return requested;
+        if (requested != null && currentUser().getRole() == Role.admin) return requested;
         Integer fromContext = BranchContext.get();
         if (fromContext != null) return fromContext;
         User user = currentUser();
@@ -130,6 +149,7 @@ public class LeadServiceImpl implements LeadService {
             throw new RuntimeException("Phone number is required");
 
         User creator = currentUser();
+        if (request.getStatus() == LeadStatus.CONVERTED) throw new IllegalArgumentException("Register a customer before converting the lead");
 
         Lead lead = new Lead();
         lead.setName(request.getName().trim());
@@ -147,7 +167,7 @@ public class LeadServiceImpl implements LeadService {
             lead.setBranch(branch);
         }
 
-        Integer officerId = request.getAssignedOfficerId();
+        Integer officerId = creator.getRole() == Role.admin ? request.getAssignedOfficerId() : creator.getId();
         User officer = officerId != null
                 ? userRepository.findById(officerId).orElse(null)
                 : creator;
@@ -172,8 +192,9 @@ public class LeadServiceImpl implements LeadService {
     @Override
     @Transactional
     public LeadDto updateLead(Integer id, CreateLeadRequest request) {
-        Lead lead = leadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lead not found"));
+        Lead lead = accessibleLead(id);
+        requireOpenLead(lead);
+        if (request.getStatus() == LeadStatus.CONVERTED) throw new IllegalArgumentException("Register a customer before converting the lead");
 
         if (request.getName() != null && !request.getName().isBlank()) lead.setName(request.getName().trim());
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank())
@@ -182,10 +203,10 @@ public class LeadServiceImpl implements LeadService {
         if (request.getSource() != null) lead.setSource(request.getSource());
         if (request.getLocation() != null) lead.setLocation(request.getLocation());
         if (request.getNextActionDate() != null) lead.setNextActionDate(request.getNextActionDate());
-        if (request.getAssignedOfficerId() != null) {
+        if (request.getAssignedOfficerId() != null && currentUser().getRole() == Role.admin) {
             userRepository.findById(request.getAssignedOfficerId()).ifPresent(lead::setAssignedOfficer);
         }
-        if (request.getBranchId() != null) {
+        if (request.getBranchId() != null && currentUser().getRole() == Role.admin) {
             branchRepository.findById(request.getBranchId()).ifPresent(lead::setBranch);
         }
 
@@ -195,8 +216,9 @@ public class LeadServiceImpl implements LeadService {
     @Override
     @Transactional
     public LeadDto updateStatus(Integer id, LeadStatus status) {
-        Lead lead = leadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lead not found"));
+        Lead lead = accessibleLead(id);
+        requireOpenLead(lead);
+        if (status == LeadStatus.CONVERTED) throw new IllegalArgumentException("Register a customer before converting the lead");
         lead.setStatus(status);
         if (status == LeadStatus.CONVERTED || status == LeadStatus.DEAD) {
             lead.setNextActionDate(null);
@@ -207,8 +229,9 @@ public class LeadServiceImpl implements LeadService {
     @Override
     @Transactional
     public LeadActivityDto addActivity(Integer leadId, CreateLeadActivityRequest request) {
-        Lead lead = leadRepository.findById(leadId)
-                .orElseThrow(() -> new RuntimeException("Lead not found"));
+        Lead lead = accessibleLead(leadId);
+        requireOpenLead(lead);
+        if (request.getStatus() == LeadStatus.CONVERTED) throw new IllegalArgumentException("Register a customer before converting the lead");
 
         LeadActivity activity = new LeadActivity();
         activity.setLead(lead);
@@ -239,8 +262,13 @@ public class LeadServiceImpl implements LeadService {
     @Override
     @Transactional
     public LeadDto convertLead(Integer leadId, Integer customerId) {
-        Lead lead = leadRepository.findById(leadId)
-                .orElseThrow(() -> new RuntimeException("Lead not found"));
+        Lead lead = accessibleLead(leadId);
+        if (customerId == null) throw new IllegalArgumentException("Registered customer is required");
+        customerServices.getCustomer(customerId);
+        if (lead.getStatus() == LeadStatus.CONVERTED) {
+            if (Objects.equals(lead.getConvertedCustomerId(), customerId)) return toDto(lead, true);
+            throw new IllegalArgumentException("Lead is already linked to another customer");
+        }
 
         lead.setStatus(LeadStatus.CONVERTED);
         lead.setConvertedCustomerId(customerId);
@@ -263,6 +291,8 @@ public class LeadServiceImpl implements LeadService {
     @Override
     @Transactional
     public void deleteLead(Integer id) {
+        accessibleLead(id);
+        if (currentUser().getRole() != Role.admin) throw new AccessDeniedException("Only administrators may delete leads");
         leadRepository.deleteById(id);
     }
 
@@ -270,8 +300,7 @@ public class LeadServiceImpl implements LeadService {
 
     @Override
     public LeadDto getLead(Integer id) {
-        Lead lead = leadRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lead not found"));
+        Lead lead = accessibleLead(id);
         return toDto(lead, true);
     }
 
@@ -282,6 +311,8 @@ public class LeadServiceImpl implements LeadService {
                                                    LocalDate dueBefore,
                                                    String search) {
         Integer branchId = resolveBranchId(null);
+        User caller = currentUser();
+        if (caller.getRole() != Role.admin) officerId = caller.getId();
         String term = (search == null || search.isBlank()) ? null : search.trim();
 
         Page<Lead> leads = leadRepository.search(branchId, officerId, status, dueBefore, term, pageable);

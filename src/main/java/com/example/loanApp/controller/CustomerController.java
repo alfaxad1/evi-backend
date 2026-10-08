@@ -1,6 +1,10 @@
 package com.example.loanApp.controller;
 
 import com.example.loanApp.dtos.CreateCustomerRequest;
+import com.example.loanApp.dtos.CreateGuarantorRequest;
+import com.example.loanApp.dtos.CreateRefereeRequest;
+import jakarta.validation.Valid;
+import java.util.Map;
 import com.example.loanApp.dtos.CustomerDetailsDto;
 import com.example.loanApp.dtos.GenericResponse;
 import com.example.loanApp.dtos.TransferCustomerRequest;
@@ -37,8 +41,8 @@ public class CustomerController {
             @RequestPart(value = "guarantorIdPhoto0", required = false) MultipartFile guarantorIdPhoto0,
             @RequestPart(value = "guarantorPassPhoto0", required = false) MultipartFile guarantorPassPhoto0
     ){
-        customerService.createCustomer(customerRequest, nationalIdPhoto, passportPhoto, guarantorIdPhoto0, guarantorPassPhoto0);
-        return ResponseHandler.responseBuilder("created successfully", HttpStatus.CREATED, null);
+        Integer id = customerService.createCustomer(customerRequest, nationalIdPhoto, passportPhoto, guarantorIdPhoto0, guarantorPassPhoto0);
+        return ResponseHandler.responseBuilder("created successfully", HttpStatus.CREATED, Map.of("id", id));
     }
 
     @GetMapping("/customers")
@@ -61,7 +65,7 @@ public class CustomerController {
     //get customer by id
     @GetMapping("/customer/{id}")
     public ResponseEntity<Object> getCustomer(@PathVariable Integer id){
-        Customer customer = customerService.getCustomer(id);
+        CustomerDetailsDto customer = customerService.getCustomerDetails(id);
         if(customer != null)
             return ResponseHandler.responseBuilder("customer found", HttpStatus.OK, customer);
         return ResponseHandler.responseBuilder("customer doesn't exist", HttpStatus.NOT_FOUND, null);
@@ -71,6 +75,18 @@ public class CustomerController {
     public ResponseEntity<?> getAllCustomers(@RequestParam(required = false, defaultValue = "0") int page, @RequestParam(required = false, defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return ResponseEntity.ok().body(customerService.findCustomers(pageable));
+    }
+
+    @PostMapping("/customer/{id}/guarantors")
+    public ResponseEntity<?> addGuarantor(@PathVariable Integer id, @Valid @RequestBody CreateGuarantorRequest request) {
+        customerService.addGuarantor(id, request);
+        return ResponseHandler.responseBuilder("Guarantor added", HttpStatus.CREATED, null);
+    }
+
+    @PostMapping("/customer/{id}/referees")
+    public ResponseEntity<?> addReferee(@PathVariable Integer id, @Valid @RequestBody CreateRefereeRequest request) {
+        customerService.addReferee(id, request);
+        return ResponseHandler.responseBuilder("Referee added", HttpStatus.CREATED, null);
     }
 
     @PutMapping("/customer/transfer")

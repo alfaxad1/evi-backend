@@ -17,6 +17,7 @@ public class DashboardSummaryDto {
     private Long pendingApproval;
     private Long pendingDisbursement;
     private Long defaulted;
+    private float defaultedBalance;
     private Long rejected;
     private float totalInterest;
     private float interestEarnedToday;
