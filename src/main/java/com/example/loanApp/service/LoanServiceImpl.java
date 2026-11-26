@@ -421,7 +421,7 @@ public class LoanServiceImpl implements LoanService {
                     .active(loanRepository.loansWithStatusCount(userId, List.of(LoanStatus.active, LoanStatus.partially_paid), branchId, role))
                     .pendingApproval(loanRepository.loansWithApprovalStatusCount(userId,role, branchId, pending))
                     .pendingDisbursement(loanRepository.loansWithStatusCount(userId, List.of(LoanStatus.pending_disbursement), branchId, role))
-                    .rejected(loanRepository.loansWithApprovalStatusCount(userId, role, branchId, approved))
+                    .rejected(loanRepository.loansWithApprovalStatusCount(userId, role, branchId, rejected))
                     .defaulted(loanRepository.loansWithStatusCount(userId, List.of(LoanStatus.defaulted), branchId, role))
                     .defaultedBalance(loanRepository.loansWithStatusBalance(userId, List.of(LoanStatus.defaulted), branchId, role))
                     .totalInterest(loanRepository.totalInterest(userId, LoanStatus.active, role, branchId, LocalDate.now().getMonthValue()))
